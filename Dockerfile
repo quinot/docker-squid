@@ -1,29 +1,27 @@
-FROM alpine:3.15.0 as build
+FROM debian:stable as build
 
 ENV SQUID_VER 5.4
 
 RUN set -x && \
-	apk add --no-cache  \
+	apt-get update && \
+	apt-get install -y \
 		gcc \
 		g++ \
 		libc-dev \
 		curl \
 		gnupg \
-		libressl-dev \
-		perl-dev \
+		libssl-dev \
+		libperl-dev \
 		autoconf \
 		automake \
 		make \
-		pkgconfig \
-		heimdal-dev \
 		libtool \
-		libcap-dev \
-		linux-headers
+		libcap-dev
 
 RUN set -x && \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
-    curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
 	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
 
 COPY squid-keys.asc /tmp
@@ -34,10 +32,11 @@ RUN set -x && \
 	gpg --import /tmp/squid-keys.asc && \
 	gpg --batch --verify squid-${SQUID_VER}.tar.gz.asc squid-${SQUID_VER}.tar.gz && \
 	rm -rf "$GNUPGHOME"
-	
+
 RUN set -x && \
-	cd /tmp/build && \	
-	tar --strip 1 -xzf squid-${SQUID_VER}.tar.gz && \
+	cd /tmp/build && \
+	tar -xzf squid-${SQUID_VER}.tar.gz && \
+        cd squid-${SQUID_VER} && \
 	\
 	CFLAGS="-g0 -O2" \
 	CXXFLAGS="-g0 -O2" \
@@ -61,10 +60,8 @@ RUN set -x && \
 		--enable-epoll \
 		--enable-external-acl-helpers="file_userip,unix_group,wbinfo_group" \
 		--enable-auth-ntlm="fake" \
-		--enable-auth-negotiate="kerberos,wrapper" \
+		--enable-auth-negotiate="wrapper" \
 		--enable-silent-rules \
-		--disable-mit \
-		--enable-heimdal \
 		--enable-delay-pools \
 		--enable-arp-acl \
 		--enable-openssl \
@@ -89,39 +86,29 @@ RUN set -x && \
 		--with-large-files \
 		--with-default-user=squid \
 		--with-openssl \
-		--with-pidfile=/var/run/squid/squid.pid
-
-# fix build
-RUN set -x && \
-    mkdir -p /tmp/build/tools/squidclient/tests && \
-    mkdir -p /tmp/build/tools/tests
-
-RUN set -x && \
-	cd /tmp/build && \
-	nproc=$(n=$(nproc) ; max_n=6 ; [ $n -le $max_n ] && echo $n || echo $max_n) && \
-	make -j $nproc && \
+		--with-pidfile=/var/run/squid/squid.pid && \
+	make -j 8 && \
 	make install && \
 	cd tools/squidclient && make && make install-strip
 
 RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
 RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
 
-FROM alpine:3.15.0
-	
+FROM debian:stable
+
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
 
 RUN set -x && \
 	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
-	addgroup -S squid -g 3128 && adduser -S -u 3128 -G squid -g squid -H -D -s /bin/false -h /var/cache/squid squid
+	addgroup --gid 3128 squid && adduser --quiet --gecos Squid --uid 3128 --ingroup squid --shell /bin/false --home /var/cache/squid --disabled-password squid
 
-RUN apk add --no-cache \
-		libstdc++ \
-		heimdal-libs \
-		libcap \
-		libressl3.4-libcrypto \
-		libressl3.4-libssl \
-		libltdl	
+RUN apt-get update && \
+	apt-get install -y --no-install-recommends \
+	squidguard \
+	libdb5.3 \
+        libcap2 \
+	libltdl7
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
@@ -129,25 +116,19 @@ COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
 COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
 
-		
 RUN install -d -o squid -g squid \
 		/var/cache/squid \
 		/var/log/squid \
 		/var/run/squid && \
 	chmod +x /usr/lib/squid/*
-	
+
 RUN install -d -m 755 -o squid -g squid \
 		/etc/squid/conf.d \
 		/etc/squid/conf.d.tail
-RUN touch /etc/squid/conf.d/placeholder.conf 
+RUN touch /etc/squid/conf.d/placeholder.conf
 COPY squid-log.conf /etc/squid/conf.d.tail/
 
-RUN	set -x && \
-	apk add --no-cache --virtual .tz alpine-conf tzdata && \ 
-	/sbin/setup-timezone -z $TZ && \
-	apk del .tz 	
-	
-VOLUME ["/var/cache/squid"]	
+VOLUME ["/var/cache/squid"]
 EXPOSE 3128/tcp
 
 USER squid
