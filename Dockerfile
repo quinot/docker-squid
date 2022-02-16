@@ -108,7 +108,8 @@ RUN apt-get update && \
 	squidguard \
 	libdb5.3 \
         libcap2 \
-	libltdl7
+	libltdl7 \
+	cron
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
@@ -128,9 +129,9 @@ RUN install -d -m 755 -o squid -g squid \
 RUN touch /etc/squid/conf.d/placeholder.conf
 COPY squid-log.conf /etc/squid/conf.d.tail/
 
+COPY entrypoint.sh /sbin
+
 VOLUME ["/var/cache/squid"]
 EXPOSE 3128/tcp
 
-USER squid
-
-CMD ["sh", "-c", "/usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -YCd 1"]
+ENTRYPOINT ["/sbin/entrypoint.sh"]
