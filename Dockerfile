@@ -105,6 +105,7 @@ RUN set -x && \
 
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
+	curl \
 	squidguard \
 	libdb5.3 \
         libcap2 \
@@ -129,9 +130,9 @@ RUN install -d -m 755 -o squid -g squid \
 RUN touch /etc/squid/conf.d/placeholder.conf
 COPY squid-log.conf /etc/squid/conf.d.tail/
 
-COPY entrypoint.sh /sbin
+COPY files/ /
 
 VOLUME ["/var/cache/squid"]
 EXPOSE 3128/tcp
 
-ENTRYPOINT ["/sbin/entrypoint.sh"]
+ENTRYPOINT ["/libexec/entrypoint.sh"]

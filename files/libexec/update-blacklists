@@ -1,0 +1,32 @@
+#! /bin/sh
+
+set -ex
+
+etc_dir=/etc/squidguard
+db_dir=/var/lib/squidguard/db
+blacklists_url=ftp://ftp.ut-capitole.fr/pub/reseau/cache/squidguard_contrib/blacklists.tar.gz
+
+if [ "x$1" = "x--use-cached-blacklists" ]; then
+  use_cache=true
+else
+  use_cache=false
+fi
+
+cd $etc_dir
+rm -f squidGuard.conf
+cat conf.d/*.conf > squidGuard.conf
+
+cd $db_dir
+if [ -d blacklists ] && $use_cache; then
+  : Use cached blacklists
+else
+  rm -f blacklists.tar.gz
+  curl -o blacklists.tar.gz $blacklists_url
+  tar xvf blacklists.tar.gz
+fi
+
+squidGuard -C all -d
+
+if [ -f /var/run/squid.pid ]; then
+  service squid reload
+fi
