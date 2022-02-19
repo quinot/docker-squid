@@ -84,33 +84,34 @@ RUN set -x && \
 		--disable-snmp \
 		--disable-dependency-tracking \
 		--with-large-files \
-		--with-default-user=squid \
+		--with-default-user=proxy \
 		--with-openssl \
 		--with-pidfile=/var/run/squid/squid.pid && \
 	make -j 8 && \
 	make install && \
 	cd tools/squidclient && make && make install-strip
 
-RUN sed -i '1s;^;include /etc/squid/conf.d/*.conf\n;' /etc/squid/squid.conf
-RUN echo 'include /etc/squid/conf.d.tail/*.conf' >> /etc/squid/squid.conf
+RUN sed -i \
+	-e '1i\
+include /etc/squid/conf.d/*.conf' \
+	-e '$a\
+include /etc/squid/conf.d.tail/*.conf' \
+	/etc/squid/squid.conf
 
 FROM debian:stable
 
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
 ENV TZ Europe/Moscow
 
-RUN set -x && \
-	deluser squid 2>/dev/null; delgroup squid 2>/dev/null; \
-	addgroup --gid 3128 squid && adduser --quiet --gecos Squid --uid 3128 --ingroup squid --shell /bin/false --home /var/cache/squid --disabled-password squid
-
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
+	cron \
 	curl \
-	squidguard \
-	libdb5.3 \
         libcap2 \
+	libdb5.3 \
 	libltdl7 \
-	cron
+	openssl \
+	squidguard
 
 COPY --from=build /etc/squid/ /etc/squid/
 COPY --from=build /usr/lib/squid/ /usr/lib/squid/
@@ -118,21 +119,20 @@ COPY --from=build /usr/share/squid/ /usr/share/squid/
 COPY --from=build /usr/sbin/squid /usr/sbin/squid
 COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
 
-RUN install -d -o squid -g squid \
+RUN install -d -o proxy -g proxy \
 		/var/cache/squid \
 		/var/log/squid \
 		/var/run/squid && \
 	chmod +x /usr/lib/squid/*
 
-RUN install -d -m 755 -o squid -g squid \
+RUN install -d -m 755 -o proxy -g proxy \
 		/etc/squid/conf.d \
 		/etc/squid/conf.d.tail
 RUN touch /etc/squid/conf.d/placeholder.conf
-COPY squid-log.conf /etc/squid/conf.d.tail/
 
 COPY files/ /
 
-VOLUME ["/var/cache/squid"]
-EXPOSE 3128/tcp
+VOLUME /etc/squid/conf.d /var/lib/squidguard/db /var/cache/squid
+EXPOSE 3128 3129 3130/tcp
 
 ENTRYPOINT ["/libexec/entrypoint.sh"]
