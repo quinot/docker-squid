@@ -1,1 +1,1 @@
-07 03 * * * root /libexec/update-blacklists
+07 03 * * * proxy /libexec/update-blacklists
