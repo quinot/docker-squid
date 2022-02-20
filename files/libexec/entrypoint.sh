@@ -2,11 +2,22 @@
 
 set -ex
 
+# Network
+
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-ports 3129
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-ports 3130
+
+# cron for blacklists refresh
+
 service cron start
+
+# squidGuard
 
 cd /etc/squidguard
 rm -f squidGuard.conf
 cat conf.d/* > squidGuard.conf
+
+# Squid
 
 ssl_dir=/etc/squid/ssl
 install -o proxy -g proxy -m 0700 -d ${ssl_dir}
@@ -17,6 +28,6 @@ chown proxy:proxy /etc/squid/ssl/*
 # hence the use of "|cat" (else the pipe is owned by root).
 # Cf https://github.com/moby/moby/issues/31243#issuecomment-406879017
 
-su -s /bin/sh proxy -c "/libexec/update-blacklists --boot; /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -YCd 1 | cat"
+su -s /bin/sh proxy -c "/libexec/update-blacklists --boot; /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -z && exec /usr/sbin/squid -f ${SQUID_CONFIG_FILE} --foreground -YC -d ${SQUID_LOG_LEVEL} | cat"
 
 

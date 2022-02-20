@@ -101,13 +101,15 @@ include /etc/squid/conf.d.tail/*.conf' \
 FROM debian:stable
 
 ENV SQUID_CONFIG_FILE /etc/squid/squid.conf
+ENV SQUID_LOG_LEVEL 1
 ENV TZ Europe/Moscow
 
 RUN apt-get update && \
 	apt-get install -y --no-install-recommends \
 	cron \
 	curl \
-        libcap2 \
+	iptables \
+	libcap2 \
 	libdb5.3 \
 	libltdl7 \
 	openssl \
