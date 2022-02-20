@@ -112,6 +112,7 @@ RUN apt-get update && \
 	libcap2 \
 	libdb5.3 \
 	libltdl7 \
+	lighttpd \
 	openssl \
 	squidguard
 
@@ -130,7 +131,11 @@ RUN install -d -o proxy -g proxy \
 RUN install -d -m 755 -o proxy -g proxy \
 		/etc/squid/conf.d \
 		/etc/squid/conf.d.tail
+
 RUN touch /etc/squid/conf.d/placeholder.conf
+
+RUN lighty-enable-mod cgi && \
+	install -m 755 -o root -g root -D /usr/share/doc/squidguard/examples/squidGuard-simple.cgi /usr/lib/cgi-bin/squidGuard.cgi
 
 COPY files/ /
 

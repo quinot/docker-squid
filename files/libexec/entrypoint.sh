@@ -7,9 +7,10 @@ set -ex
 iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j REDIRECT --to-ports 3129
 iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j REDIRECT --to-ports 3130
 
-# cron for blacklists refresh
+# Start services
 
 service cron start
+service lighttpd start
 
 # squidGuard
 
