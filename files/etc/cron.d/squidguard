@@ -1,1 +1,3 @@
+SHELL=/bin/sh
+
 07 03 * * * proxy /libexec/update-blacklists
