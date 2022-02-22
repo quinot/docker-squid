@@ -1,3 +1,33 @@
+# Thomas' fork of `docker-squid`
+
+This is my fork of a Docker container running a recent version of Squid, for the purpose of implementing parental control through a transparent filtering proxy.
+
+## Features
+
+* Running Squid 5.4 and squidGuard 1.6.0 on a Debian stable system
+* Using blacklists published by [Université de Toulouse](https://dsi.ut-capitole.fr/blacklists/)
+* cron-based nightly refresh of blacklists
+* Configured for transparent interception of HTTP and HTTPS traffic, with TLS splicing
+* Lighttpd to serve squidGuard's blocked page CGI
+
+## TBD
+
+### Docker image
+
+* TLS bumping (at least for intercepted pages)
+* ssmtp for cron errors
+* logging and reporting (SARG?)
+
+### Local deployment
+
+* L2 ipvlan traffic delivery
+* configuration & deployment with
+  * docker-compose?
+  * Ansible?
+  * K8s (nah just kidding)
+
+# Upstream below
+
 [![Drone Build Status](https://cloud.drone.io/api/badges/b4tman/docker-squid/status.svg?ref=refs/heads/master)](https://cloud.drone.io/b4tman/docker-squid)
 ![Docker Build Status](https://img.shields.io/docker/cloud/build/b4tman/squid)
 ![Docker Image CI Status](https://github.com/b4tman/docker-squid/workflows/Docker%20Image%20CI/badge.svg)
