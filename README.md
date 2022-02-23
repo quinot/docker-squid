@@ -21,6 +21,7 @@ This is my fork of a Docker container running a recent version of Squid, for the
 ### Local deployment
 
 * L2 ipvlan traffic delivery
+* Configuration of client ACL through RADIUS
 * configuration & deployment with
   * docker-compose?
   * Ansible?
