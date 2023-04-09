@@ -2,9 +2,14 @@
 
 This is my fork of a Docker container running a recent version of Squid, for the purpose of implementing parental control through a transparent filtering proxy.
 
+Automated builds of the image are available on:
+
+- DockerHub: [quinot/squid](https://hub.docker.com/r/quinot/squid)
+  - ![Docker Image CI Status](https://github.com/quinot/docker-squid/workflows/Docker%20Image%20CI/badge.svg)
+
 ## Features
 
-* Running Squid 5.4 and squidGuard 1.6.0 on a Debian stable system
+* Running Squid 5.8 and squidGuard 1.6.0 on a Debian stable system
 * Using blacklists published by [Université de Toulouse](https://dsi.ut-capitole.fr/blacklists/)
 * cron-based nightly refresh of blacklists
 * Configured for transparent interception of HTTP and HTTPS traffic, with TLS splicing
@@ -29,22 +34,10 @@ This is my fork of a Docker container running a recent version of Squid, for the
 
 # Upstream below
 
-[![Drone Build Status](https://cloud.drone.io/api/badges/b4tman/docker-squid/status.svg?ref=refs/heads/master)](https://cloud.drone.io/b4tman/docker-squid)
-![Docker Build Status](https://img.shields.io/docker/cloud/build/b4tman/squid)
-![Docker Image CI Status](https://github.com/b4tman/docker-squid/workflows/Docker%20Image%20CI/badge.svg)
-
 # docker-squid
 
 Docker Squid container based on Alpine Linux.
 
-Automated builds of the image are available on:
-
-- DockerHub:
-  - [b4tman/squid](https://hub.docker.com/r/b4tman/squid)
-- Github:
-  - [ghcr.io/b4tman/squid](https://github.com/users/b4tman/packages/container/package/squid)
-  - [ghcr.io/b4tman/squid-armhf](https://github.com/users/b4tman/packages/container/package/squid-armhf)
-  - [ghcr.io/b4tman/squid-ssl-bump](https://github.com/users/b4tman/packages/container/package/squid-ssl-bump)
 
 # Quick Start
 
