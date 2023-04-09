@@ -1,6 +1,6 @@
 FROM debian:stable as build
 
-ENV SQUID_VER 5.4
+ENV SQUID_VER 5.8
 
 RUN set -x && \
 	apt-get update && \
