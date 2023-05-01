@@ -2,18 +2,18 @@ name: Docker Image CI
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
+    # Publish `main` as Docker `latest` image.
     branches:
-      - master
+      - main
 
     # Publish `v1.2.3` tags as releases.
     tags:
       - v*
 
-  # Run tests for PRs to `master` branch.
+  # Run tests for PRs to `main` branch.
   pull_request:
     branches:
-      - "master"
+      - "main"
 
 
 jobs:
@@ -29,9 +29,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/squid
+            ${{ secrets.DOCKERHUB_USERNAME || 'PR' }}/${{ vars.DOCKER_IMAGE_NAME }}
           flavor: |
-            latest=${{ github.ref == 'refs/heads/master' }}
+            latest=${{ github.ref == 'refs/heads/main' }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
