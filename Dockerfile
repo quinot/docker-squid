@@ -124,6 +124,7 @@ COPY --from=build /usr/bin/squidclient /usr/bin/squidclient
 
 RUN install -d -o proxy -g proxy \
 		/var/cache/squid \
+		/var/lib/squidguard/db \
 		/var/log/squid \
 		/var/run/squid && \
 	chmod +x /usr/lib/squid/*
