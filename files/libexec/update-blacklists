@@ -19,8 +19,8 @@ else
   rm -f blacklists.tar.gz
   curl -o blacklists.tar.gz $blacklists_url
   tar xvf blacklists.tar.gz
-  squidGuard -C all
 fi
+squidGuard -C all
 
 if [ -f $squid_pidfile ]; then
   kill -HUP $(cat $squid_pidfile)
