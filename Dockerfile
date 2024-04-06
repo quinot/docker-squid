@@ -113,6 +113,7 @@ RUN apt-get update && \
 	libdb5.3 \
 	libltdl7 \
 	lighttpd \
+	m4 \
 	openssl \
 	squidguard
 

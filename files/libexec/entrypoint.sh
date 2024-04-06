@@ -16,7 +16,7 @@ service lighttpd start
 
 cd /etc/squidguard
 rm -f squidGuard.conf
-cat conf.d/* > squidGuard.conf
+cat conf.d/* | m4 > squidGuard.conf
 
 # Squid
 
