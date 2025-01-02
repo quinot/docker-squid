@@ -1,6 +1,6 @@
 FROM debian:stable as build
 
-ENV SQUID_VER 5.8
+ENV SQUID_VER 6.12
 
 RUN set -x && \
 	apt-get update && \
@@ -21,8 +21,8 @@ RUN set -x && \
 RUN set -x && \
 	mkdir -p /tmp/build && \
 	cd /tmp/build && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
-	curl -SsL http://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
+	curl -SsL https://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz -o squid-${SQUID_VER}.tar.gz && \
+	curl -SsL https://www.squid-cache.org/Versions/v${SQUID_VER%%.*}/squid-${SQUID_VER}.tar.gz.asc -o squid-${SQUID_VER}.tar.gz.asc
 
 COPY squid-keys.asc /tmp
 
@@ -109,6 +109,7 @@ RUN apt-get update && \
 	cron \
 	curl \
 	iptables \
+	libstdc++6 \
 	libcap2 \
 	libdb5.3 \
 	libltdl7 \
